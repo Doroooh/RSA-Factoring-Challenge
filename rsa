@@ -1,48 +1,31 @@
-#!/usr/bin/env bash
-#is a challenge
-check_factor()
-{
-	if [ $# -ne 3 ];
-        then
-                args=("$@")
-                count=0
-                num2=1
-                for a in ${args[*]};
-                do
-                        if [ $count -gt 1 ];
-                        then
-                                num2=$(echo $a*$num2 | bc)
-                        fi
-                        count=$((count + 1))
-                done
-        else
-                num2=$3
-        fi
+#!/usr/bin/python3
+# challenge
 
-        num1=$2
-        num=$(echo "$1" | tr ':' '=')
+import math
+import time
 
-        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
-	        if ((result == 1)); then
-		        numcp=$num1
-		        num1=$num2
-		        num2=$numcp
-                fi
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+    return True
 
-        echo "$num$num1*$num2"
-}
+def factorize(n):
+    for i in range(2, n // 2 + 1):
+        if is_prime(i) and is_prime(n // i) and n % i == 0:
+            return i, n // i
+    return n, 1
 
-if [ $# -ne 1 ]
-then
-        echo 'Usage: rsa <file>'
-        exit 1
-else
+def main():
+    with open('tests/rsa-16', 'r') as f:
+        for line in f:
+            n = int(line.strip())
+            start_time = time.time()
+            p, q = factorize(n)
+            end_time = time.time()
+            print(f'{n}={p}*{q} (time: {end_time - start_time:.6f}s)')
 
-        while read i
-        do
-
-                result=$(factor "$i")
-                check_factor $result
-
-        done < "$1"
-fi
+if __name__ == '__main__':
+    main()
